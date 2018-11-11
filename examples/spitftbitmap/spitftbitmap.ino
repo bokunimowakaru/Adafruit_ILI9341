@@ -1,59 +1,55 @@
-/***************************************************
-  This is our Bitmap drawing example for the Adafruit ILI9341 Breakout and Shield
-  ----> http://www.adafruit.com/products/1651
+/***********************************************************************
+BMP file Viewer for M5 Stack:
+Please copy the file "purple.bmp" to SD card in your M5 Stack.
+************************************************************************
+SDカードへ保存したBMPファイルをM5 Stackの液晶画面へ表示します。
+ボタン操作で画像を回転します。
+※予めSDカードへpurple.bmpを保存してから、実行してください。
+***********************************************************************/
 
-  Check out the links above for our tutorials and wiring diagrams
-  These displays use SPI to communicate, 4 or 5 pins are required to
-  interface (RST is optional)
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada for Adafruit Industries.
-  MIT license, all text above must be included in any redistribution
- ****************************************************/
-
-
-#include <Adafruit_GFX.h>    // Core graphics library
-#include "Adafruit_ILI9341.h" // Hardware-specific library
+#include "Adafruit_ILI9341.h"
 #include <SPI.h>
 #include <SD.h>
 
-// TFT display and SD card will share the hardware SPI interface.
-// Hardware SPI pins are specific to the Arduino board type and
-// cannot be remapped to alternate pins.  For Arduino Uno,
-// Duemilanove, etc., pin 11 = MOSI, pin 12 = MISO, pin 13 = SCK.
+Adafruit_ILI9341 tft = Adafruit_ILI9341();
 
-#define TFT_DC 9
-#define TFT_CS 10
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-
+#define BTN_A 39
+#define BTN_B 38
+#define BTN_C 37
 #define SD_CS 4
 
 void setup(void) {
-  Serial.begin(9600);
-
+  Serial.begin(115200);
+  pinMode(BTN_A,INPUT);
+  pinMode(BTN_B,INPUT);
+  pinMode(BTN_C,INPUT);
   tft.begin();
-  
+  tft.fillScreen(ILI9341_BLUE);
   yield();
 
-  Serial.print("Initializing SD card...");
-  if (!SD.begin(SD_CS)) {
-    Serial.println("failed!");
+  tft.print("Initializing SD card...");
+  if (!SD.begin(SD_CS)){
+	tft.println("failed!");
+	while(true) delay(100);
   }
-  Serial.println("OK!");
-
+  tft.println("OK!");
+  
+  tft.setRotation(3);
+  bmpDraw("/purple.bmp",
+      (tft.width()  / 2) - (120),
+      (tft.height() / 2) - (160));
 }
 
 void loop() {
-  for(uint8_t r=0; r<4; r++) {
-    tft.setRotation(r);
-    tft.fillScreen(ILI9341_BLUE);
-    for(int8_t i=-2; i<1; i++) {
-      bmpDraw("/purple.bmp",
-        (tft.width()  / 2) + (i * 120),
-        (tft.height() / 2) + (i * 160));
-    }
+  uint8_t btn;
+  for(btn = BTN_A; btn >=BTN_C; btn--){
+	if( !digitalRead(btn) ){
+	  tft.setRotation(41-btn);
+	  tft.fillScreen(ILI9341_BLUE);
+	  bmpDraw("/purple.bmp",
+	      (tft.width()  / 2) - (120),
+	      (tft.height() / 2) - (160));
+	}
   }
 }
 
@@ -216,3 +212,30 @@ uint32_t read32(File &f) {
   ((uint8_t *)&result)[3] = f.read(); // MSB
   return result;
 }
+
+/***********************************************************************
+本ソースリストは2018/11/6に下記からダウンロードしたものを、
+国野亘が m5 stack用に改変したものです。
+
+	https://github.com/adafruit/Adafruit_ILI9341
+
+2018/11/6 国野 亘
+***********************************************************************/
+
+/***************************************************
+  This is our Bitmap drawing example for the Adafruit ILI9341 Breakout and Shield
+  ----> http://www.adafruit.com/products/1651
+
+  Check out the links above for our tutorials and wiring diagrams
+  These displays use SPI to communicate, 4 or 5 pins are required to
+  interface (RST is optional)
+  Adafruit invests time and resources providing this open source code,
+  please support Adafruit and open-source hardware by purchasing
+  products from Adafruit!
+
+  Written by Limor Fried/Ladyada for Adafruit Industries.
+  MIT license, all text above must be included in any redistribution
+ ****************************************************/
+
+// TFT display and SD card will share the hardware SPI interface.
+

@@ -1,29 +1,15 @@
-//This example implements a simple sliding On/Off button. The example
-// demonstrates drawing and touch operations.
-//
-//Thanks to Adafruit forums member Asteroid for the original sketch!
-//
+/***********************************************************************
+example: buttons on M5 Stack
+************************************************************************
+M5 Stack 上のボタン操作のデモ用サンプルです
+***********************************************************************/
+
 #include <Adafruit_GFX.h>
 #include <SPI.h>
 #include <Wire.h>
 #include <Adafruit_ILI9341.h>
-#include <Adafruit_STMPE610.h>
 
-// This is calibration data for the raw touch data to the screen coordinates
-#define TS_MINX 150
-#define TS_MINY 130
-#define TS_MAXX 3800
-#define TS_MAXY 4000
-
-#define STMPE_CS 8
-Adafruit_STMPE610 ts = Adafruit_STMPE610(STMPE_CS);
-#define TFT_CS 10
-#define TFT_DC 9
-Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
-
-boolean RecordOn = false;
-
-#define FRAME_X 210
+#define FRAME_X 60
 #define FRAME_Y 180
 #define FRAME_W 100
 #define FRAME_H 50
@@ -37,6 +23,12 @@ boolean RecordOn = false;
 #define GREENBUTTON_Y FRAME_Y
 #define GREENBUTTON_W (FRAME_W/2)
 #define GREENBUTTON_H FRAME_H
+
+#define M5_STACK_BTN_A 39
+#define M5_STACK_BTN_B 38
+#define M5_STACK_BTN_C 37
+
+Adafruit_ILI9341 tft = Adafruit_ILI9341();
 
 void drawFrame()
 {
@@ -52,7 +44,6 @@ void redBtn()
   tft.setTextColor(ILI9341_WHITE);
   tft.setTextSize(2);
   tft.println("ON");
-  RecordOn = false;
 }
 
 void greenBtn()
@@ -64,62 +55,61 @@ void greenBtn()
   tft.setTextColor(ILI9341_WHITE);
   tft.setTextSize(2);
   tft.println("OFF");
-  RecordOn = true;
+}
+
+void resetBtn()
+{
+  tft.fillRect(GREENBUTTON_X, GREENBUTTON_Y, GREENBUTTON_W, GREENBUTTON_H, ILI9341_BLUE);
+  tft.fillRect(REDBUTTON_X, REDBUTTON_Y, REDBUTTON_W, REDBUTTON_H, ILI9341_BLUE);
+  drawFrame();
+  tft.setTextColor(ILI9341_WHITE);
+  tft.setTextSize(2);
+  tft.setCursor(REDBUTTON_X + 16 , REDBUTTON_Y + (REDBUTTON_H/2));
+  tft.println("Reset");
 }
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   tft.begin();
-  if (!ts.begin()) { 
-    Serial.println("Unable to start touchscreen.");
-  } 
-  else { 
-    Serial.println("Touchscreen started."); 
-  }
+  pinMode(M5_STACK_BTN_A,INPUT);
+  pinMode(M5_STACK_BTN_B,INPUT);
+  pinMode(M5_STACK_BTN_C,INPUT);
 
   tft.fillScreen(ILI9341_BLUE);
-  // origin = left,top landscape (USB left upper)
-  tft.setRotation(1); 
   redBtn();
 }
 
 void loop()
 {
-  // See if there's any  touch data for us
-  if (!ts.bufferEmpty())
-  {   
-    // Retrieve a point  
-    TS_Point p = ts.getPoint(); 
-    // Scale using the calibration #'s
-    // and rotate coordinate system
-    p.x = map(p.x, TS_MINY, TS_MAXY, 0, tft.height());
-    p.y = map(p.y, TS_MINX, TS_MAXX, 0, tft.width());
-    int y = tft.height() - p.x;
-    int x = p.y;
-
-    if (RecordOn)
-    {
-      if((x > REDBUTTON_X) && (x < (REDBUTTON_X + REDBUTTON_W))) {
-        if ((y > REDBUTTON_Y) && (y <= (REDBUTTON_Y + REDBUTTON_H))) {
+    if( digitalRead(M5_STACK_BTN_A) == LOW ) {
           Serial.println("Red btn hit"); 
           redBtn();
-        }
-      }
+          delay(100);
     }
-    else //Record is off (RecordOn == false)
-    {
-      if((x > GREENBUTTON_X) && (x < (GREENBUTTON_X + GREENBUTTON_W))) {
-        if ((y > GREENBUTTON_Y) && (y <= (GREENBUTTON_Y + GREENBUTTON_H))) {
+    if( digitalRead(M5_STACK_BTN_B) == LOW ) {
           Serial.println("Green btn hit"); 
           greenBtn();
-        }
-      }
+          delay(100);
     }
-
-    Serial.println(RecordOn);
-  }  
+    if( digitalRead(M5_STACK_BTN_C) == LOW ) {
+          Serial.println("Reset"); 
+          resetBtn();
+          delay(100);
+    }
 }
 
+/***********************************************************************
+本ソースリストは2018/11/6に下記からダウンロードしたものを、
+国野亘が m5 stack用に改変したものです。
 
+	https://github.com/adafruit/Adafruit_ILI9341
 
+2018/11/6 国野 亘
+***********************************************************************/
+
+//This example implements a simple sliding On/Off button. The example
+// demonstrates drawing and touch operations.
+//
+//Thanks to Adafruit forums member Asteroid for the original sketch!
+//

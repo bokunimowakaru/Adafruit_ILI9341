@@ -1,6 +1,5 @@
 /*
 本ソースリストは2017/11/2に下記からダウンロードしたものです。
-原作者の権利内容を継承します。
 
 	https://learn.adafruit.com/096-mini-color-oled/wiring
 

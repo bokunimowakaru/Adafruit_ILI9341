@@ -1,6 +1,6 @@
 /*
-本ソースリストは2017/11/2に下記からダウンロードしたものを、国野亘が改変したものです。
-原作者の権利内容を継承します。
+本ソースリストは2017/11/2に下記からダウンロードしたものを、
+国野亘が改変したものです。
 
 	https://learn.adafruit.com/096-mini-color-oled/wiring
 
@@ -103,8 +103,10 @@ void Adafruit_SPITFT::initSPI(uint32_t freq)
     // Control Pins
     pinMode(_dc, OUTPUT);
     digitalWrite(_dc, LOW);
-    pinMode(_cs, OUTPUT);
-    digitalWrite(_cs, HIGH);
+    if(_cs >= 0){
+		pinMode(_cs, OUTPUT);
+		digitalWrite(_cs, HIGH);
+	}
 
     // Software SPI
     if(_sclk >= 0){

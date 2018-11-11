@@ -1,4 +1,13 @@
-/*!
+/*
+本ソースリストは2018/11/6に下記からダウンロードしたものを、
+国野亘が m5 stack用に改変したものです。
+
+	https://github.com/adafruit/Adafruit_ILI9341
+
+2018/11/6 国野 亘
+
+********************************************************************************
+
 * @file Adafruit_ILI9341.h
 *
 * This is the documentation for Adafruit's ILI9341 driver for the
@@ -33,6 +42,15 @@
 *
 */
 
+/*
+本ソースリストは2018/8/22に下記からダウンロードしたものです。
+改変部以外は原作者の権利が継続します。
+
+	https://github.com/adafruit/Adafruit_ILI9341
+
+2018/8/22 国野 亘
+*/
+
 #ifndef _ADAFRUIT_ILI9341H_
 #define _ADAFRUIT_ILI9341H_
 
@@ -40,11 +58,11 @@
 #include "Print.h"
 #include <SPI.h>
 #include "Adafruit_GFX.h"
-#include <Adafruit_SPITFT.h>
-#include <Adafruit_SPITFT_Macros.h>
+#include "Adafruit_SPITFT.h"
+#include "Adafruit_SPITFT_Macros.h"
 
-#define ILI9341_TFTWIDTH   240      ///< ILI9341 max TFT width
-#define ILI9341_TFTHEIGHT  320      ///< ILI9341 max TFT height
+#define ILI9341_TFTWIDTH   320      ///< ILI9341 max TFT width
+#define ILI9341_TFTHEIGHT  240      ///< ILI9341 max TFT height
 
 #define ILI9341_NOP        0x00     ///< No-op register
 #define ILI9341_SWRESET    0x01     ///< Software reset register
@@ -122,6 +140,14 @@
 #define ILI9341_GREENYELLOW 0xAFE5  ///< 173, 255,  41
 #define ILI9341_PINK        0xFC18  ///< 255, 130, 198
 
+// for M5 STACK
+#define M5_STACK_CS			14
+#define M5_STACK_DC			27
+#define M5_STACK_MOSI		23
+#define M5_STACK_CLK		18
+#define M5_STACK_RST		33
+#define M5_STACK_LED		32
+
 /**************************************************************************/
 /*!
 @brief Class to manage hardware interface with ILI9341 chipset (also seems to work with ILI9340)
@@ -130,13 +156,29 @@
 
 class Adafruit_ILI9341 : public Adafruit_SPITFT {
     public:
-        Adafruit_ILI9341(int8_t _CS, int8_t _DC, int8_t _MOSI, int8_t _SCLK, int8_t _RST = -1, int8_t _MISO = -1);
-        Adafruit_ILI9341(int8_t _CS, int8_t _DC, int8_t _RST = -1);
+        Adafruit_ILI9341(
+        	int8_t _CS		= M5_STACK_CS,
+        	int8_t _DC		= M5_STACK_DC,
+        	int8_t _MOSI	= M5_STACK_MOSI,
+        //	int8_t _SCLK	= M5_STACK_CLK,
+        	int8_t _SCLK	= -1,
+        	int8_t _RST		= M5_STACK_RST,
+        //	int8_t _SCLK	= -1,
+        	int8_t _MISO	= -1
+        );
+        /*
+        Adafruit_ILI9341(
+        	int8_t _CS		= M5_STACK_CS,
+        	int8_t _DC		= M5_STACK_DC,
+        	int8_t _RST		= M5_STACK_RST
+        );
+        */
 
         void    begin(uint32_t freq=0);
         void    setRotation(uint8_t r);
         void    invertDisplay(boolean i);
         void    scrollTo(uint16_t y);
+        
 
         // Transaction API not used by GFX
         void    setAddrWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h);

@@ -1,4 +1,12 @@
-/*!
+/*
+本ソースリストは2018/11/6に下記からダウンロードしたものを、
+国野亘が m5 stack用に改変したものです。
+
+	https://github.com/adafruit/Adafruit_ILI9341
+
+2018/11/6 国野 亘
+********************************************************************************
+
 * @file Adafruit_ILI9341.cpp
 *
 * @mainpage Adafruit ILI9341 TFT Displays
@@ -46,15 +54,21 @@
 *
 */
 
+#include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
+/*
 #ifndef ARDUINO_STM32_FEATHER
   #include "pins_arduino.h"
   #ifndef RASPI
     #include "wiring_private.h"
   #endif
 #endif
+*/
 #include <limits.h>
+#include "glcdfont.c"
+#include <SPI.h>
 
+/*
 #if defined (ARDUINO_ARCH_ARC32) || defined (ARDUINO_MAXIM)
   #define SPI_DEFAULT_FREQ  16000000
 #elif defined (__AVR__) || defined(TEENSYDUINO)
@@ -68,6 +82,9 @@
 #else
   #define SPI_DEFAULT_FREQ  24000000  ///< Default SPI data clock frequency
 #endif
+*/
+#define SPI_DEFAULT_FREQ  40000000
+#define M5_STACK_TFT_LED  32	// GPIO Port for LCD Backlight
 
 #define MADCTL_MY  0x80  ///< Bottom to top
 #define MADCTL_MX  0x40  ///< Right to left
@@ -100,8 +117,10 @@ Adafruit_ILI9341::Adafruit_ILI9341(int8_t cs, int8_t dc, int8_t mosi,
     @param    rst   Reset pin # (optional, pass -1 if unused)
 */
 /**************************************************************************/
+/*
 Adafruit_ILI9341::Adafruit_ILI9341(int8_t cs, int8_t dc, int8_t rst) : Adafruit_SPITFT(ILI9341_TFTWIDTH, ILI9341_TFTHEIGHT, cs, dc, rst) {
 }
+*/
 
 static const uint8_t PROGMEM initcmd[] = {
   0xEF, 3, 0x03, 0x80, 0x02,
@@ -115,7 +134,7 @@ static const uint8_t PROGMEM initcmd[] = {
   ILI9341_PWCTR2  , 1, 0x10,             // Power control SAP[2:0];BT[3:0]
   ILI9341_VMCTR1  , 2, 0x3e, 0x28,       // VCM control
   ILI9341_VMCTR2  , 1, 0x86,             // VCM control2
-  ILI9341_MADCTL  , 1, 0x48,             // Memory Access Control
+  ILI9341_MADCTL  , 1, 0x08,             // Memory Access Control (0x48) 0x08 for M5 Stack
   ILI9341_VSCRSADD, 1, 0x00,             // Vertical scroll zero
   ILI9341_PIXFMT  , 1, 0x55,
   ILI9341_FRMCTR1 , 2, 0x00, 0x18,
@@ -142,6 +161,12 @@ void Adafruit_ILI9341::begin(uint32_t freq) {
     if(!freq) freq = SPI_DEFAULT_FREQ;
     _freq = freq;
 
+    // for M5 STACK
+	pinMode(14, OUTPUT);
+	pinMode(14, HIGH);
+	pinMode(M5_STACK_TFT_LED, OUTPUT);
+	digitalWrite(M5_STACK_TFT_LED, HIGH);
+	
     initSPI(freq);
 
     startWrite();
@@ -160,6 +185,7 @@ void Adafruit_ILI9341::begin(uint32_t freq) {
 
     _width  = ILI9341_TFTWIDTH;
     _height = ILI9341_TFTHEIGHT;
+    
 }
 
 
@@ -170,25 +196,26 @@ void Adafruit_ILI9341::begin(uint32_t freq) {
 */
 /**************************************************************************/
 void Adafruit_ILI9341::setRotation(uint8_t m) {
+    // for M5 Stack
     rotation = m % 4; // can't be higher than 3
     switch (rotation) {
         case 0:
-            m = (MADCTL_MX | MADCTL_BGR);
+            m = (MADCTL_BGR);								// Adafruit:(MADCTL_MX | MADCTL_BGR)
             _width  = ILI9341_TFTWIDTH;
             _height = ILI9341_TFTHEIGHT;
             break;
         case 1:
-            m = (MADCTL_MV | MADCTL_BGR);
+            m = (MADCTL_MV | MADCTL_MX | MADCTL_BGR);		// Adafruit:(MADCTL_MV | MADCTL_BGR)
             _width  = ILI9341_TFTHEIGHT;
             _height = ILI9341_TFTWIDTH;
             break;
         case 2:
-            m = (MADCTL_MY | MADCTL_BGR);
+            m = (MADCTL_MX | MADCTL_MY | MADCTL_BGR);		// Adafruit:(MADCTL_MY | MADCTL_BGR)
             _width  = ILI9341_TFTWIDTH;
             _height = ILI9341_TFTHEIGHT;
             break;
         case 3:
-            m = (MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR);
+            m = (MADCTL_MY | MADCTL_MV | MADCTL_BGR);		// Adafruit:(MADCTL_MX | MADCTL_MY | MADCTL_MV | MADCTL_BGR)
             _width  = ILI9341_TFTHEIGHT;
             _height = ILI9341_TFTWIDTH;
             break;
@@ -265,4 +292,3 @@ uint8_t Adafruit_ILI9341::readcommand8(uint8_t command, uint8_t index) {
     _freq = freq;
     return r;
 }
-
