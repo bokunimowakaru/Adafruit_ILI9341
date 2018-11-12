@@ -28,7 +28,7 @@ M5 Stack 上のボタン操作のデモ用サンプルです
 #define M5_STACK_BTN_B 38
 #define M5_STACK_BTN_C 37
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341();
+Adafruit_ILI9341 tft = Adafruit_ILI9341(14,27);
 
 void drawFrame()
 {

@@ -8,7 +8,7 @@ M5 Stack上の液晶へデモ表示を行います
 #include "Adafruit_GFX.h"
 #include "Adafruit_ILI9341.h"
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341();
+Adafruit_ILI9341 tft = Adafruit_ILI9341(14,27);
 
 void setup() {
   Serial.begin(115200);

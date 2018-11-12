@@ -9,7 +9,7 @@ The bitmap data is included in "dragon.h"
 #include <Adafruit_ILI9341.h>
 #include "dragon.h"
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341();
+Adafruit_ILI9341 tft = Adafruit_ILI9341(14,27);
 
 void setup() {
   tft.begin();

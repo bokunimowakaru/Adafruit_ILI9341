@@ -22,7 +22,7 @@ SDカードへ保存したJPEGファイルをM5 Stackの液晶画面へ表示し
 
 #define SlideShowInterval 10
 
-Adafruit_ILI9341 tft = Adafruit_ILI9341();
+Adafruit_ILI9341 tft = Adafruit_ILI9341(14,27);
 int autoSlideShow=1;
 
 void setup(void) {
